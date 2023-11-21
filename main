@@ -1,0 +1,41 @@
+import sys
+import sqlite3
+
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
+from PyQt5.QtGui import QFont
+
+
+class MyWidget(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('main.ui', self)
+        self.connection = sqlite3.connect("coffee.sqlite")
+        self.run()
+
+    def run(self):
+        res = self.connection.cursor().execute("""SELECT * FROM Coffee_list""").fetchall()
+        self.coffelist.setColumnCount(7)
+        self.coffelist.setHorizontalHeaderLabels(['ID', 'название сорта', 'степень обжарки', 'молотый/в зернах',
+                                                  'описание вкуса', 'цена', 'объем упаковки'])
+        self.coffelist.setColumnCount(7)
+        self.coffelist.setRowCount(0)
+        for i, row in enumerate(res):
+            self.coffelist.setRowCount(
+                self.coffelist.rowCount() + 1)
+            for j, elem in enumerate(row):
+                self.coffelist.setItem(
+                    i, j, QTableWidgetItem(str(elem)))
+        self.coffelist.setFont(QFont("Arial", 19))
+        self.coffelist.resizeColumnsToContents()
+
+    def closeEvent(self, event):
+        self.connection.close()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = MyWidget()
+    ex.show()
+    sys.exit(app.exec_())
